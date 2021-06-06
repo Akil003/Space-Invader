@@ -1,7 +1,7 @@
 import pygame
 import random
 import tkinter as tk
-from pygame.constants import KEYDOWN, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_ESCAPE, K_d, K_g, K_l, K_o, K_p, K_r, K_u, QUIT
+from pygame.constants import KEYDOWN, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_ESCAPE, K_b, K_d, K_g, K_l, K_o, K_p, K_r, K_u, QUIT
 from pygame import mixer
 from pygame import time
 from math import log
@@ -13,10 +13,10 @@ pygame.init()
 pygame.display.set_caption("Space Invaders")
 icon = pygame.image.load("spaceship.png")
 pygame.display.set_icon(icon)
-font1 = pygame.font.Font("Caramel Sweets.ttf", 64)
+font1 = pygame.font.Font("Caramel Sweets.ttf", 36)
 font2 = pygame.font.Font("Caramel Sweets.ttf", 48)
 
-#create the screen
+#create the screenf
 root = tk.Tk()
 width, height= int(root.winfo_screenwidth()),int(root.winfo_screenheight())
 screen = pygame.display.set_mode((width, height))
@@ -140,7 +140,10 @@ def level(kill, score_player):
         level_player = int(kill/((level_player+2)**(5/4))) + int(score_player/(10000*(1+level_player**1/2)))
     level_disp = font2.render(f"Level: {level_player}", True, (255, 255, 255))
     screen.blit(level_disp, (levelX, levelY))
-    return level_player
+    if level_player<=10:
+        return level_player
+    else: 
+        return 10
 
 
 # Final Screen
@@ -272,13 +275,12 @@ def constants():
     # Icons
     uEBullet = "Ultra Bullet.png"
     eBullet = "ebullet.png"
-    bullet = "bullet.png"
     rlike = "rlike.png"
     llike = "llike.png"
     enemyPic = "Enemy_a.png"
     playerPic = "Spaceship.png"
     uEnemyPic = "Enemy.png"
-    pBullet = "bullet.png"
+    pBullet = random.choice(["bullet"+str(i)+".png" for i in range(1, 4)])
     shieldImg = "shield.png"
     rLives = pygame.image.load(rlike)
     lLives = pygame.image.load(llike)
@@ -289,9 +291,9 @@ def constants():
     iTextX = int(width/6)
     iTextY = int(height/2)
     iTextaX = int(width/20)
-    iTextaY = int(height*4/5)
+    iTextaY = int(height*9/10)
     initialText = font2.render("Welcome! Press spacebar to enter the game", True, (255, 255, 255))
-    initialTexta = font2.render("Press Esc to exit", True, (255, 255, 255))
+    initialTexta = font1.render("Press Esc to exit", True, (255, 255, 255))
 
     # Final Text location
     fTextX = int(width*2/5)
@@ -394,15 +396,21 @@ if bossX > width/2 - bossWidth/2:
     bossChangeX = -bossChangeX
 bossChangeY = height*1/800
 bosstext = font2.render("This level will be available soon! Thankyou for playing.", True, (255, 255, 255))
+bosstext2 = font1.render("Press Esc to return to the main menu.", True, (255, 255, 255))
 def boss_level():
-    
-    global bossX, bossY
+    global bossX, bossY, health, numOfEnemy, numOfUEnemy
+    numOfUEnemy = 4
+    health = 5
+    numOfEnemy = 6
+    for _ in range(numOfUEnemy):
+        uEHealth[_] = 1
     if not width/2- bossWidth/2 - bossAppearanceError <= bossX <= width/2 + bossAppearanceError -bossWidth/2:
         bossX += bossChangeX
     if bossY > bossAppearanceError/5:
         bossY -= bossChangeY
     screen.blit(boss, (bossX, bossY))
-    screen.blit(bosstext, (width/100, height/2))
+    screen.blit(bosstext2, (width/20, height*9/10))
+    screen.blit(bosstext, (width/20, height/2))
     
 
 def player(x, y):
@@ -529,7 +537,7 @@ while running:
     # intro
     text1 = "Press arrow keys for movement and space to fire at the enemies. "
     texta = font2.render(text1, True, (255, 255, 255))
-    text2 = "Beware though because enemies can shoot too."
+    text2 = "Beware! enemies can shoot too!"
     textb = font2.render(text2, True, (255, 255, 255))
     # Event Handling
     for event in pygame.event.get():
@@ -539,7 +547,7 @@ while running:
             if event.key == K_LEFT or event.key == K_RIGHT or event.key == K_UP or event.key == K_DOWN:
                 count_movement += 1
             if event.key == K_SPACE:
-                space_pressed = 10
+                space_pressed = 20
                 space_clicked = 1
                 count_fire +=1
         
@@ -558,7 +566,7 @@ while running:
             if event.key == K_DOWN:
                     changeY += unitMovement
             if event.key == K_SPACE:
-                space_pressed = 10
+                space_pressed = 20
                 space_clicked = 1
             if event.key == K_g:
                 g = 1
@@ -573,7 +581,7 @@ while running:
                 l = 1
             if event.key == K_u:
                 u = 1
-            if event.key == K_d:
+            if event.key == K_b:
                 b = 1
 
             if event.key == K_p:
@@ -616,8 +624,8 @@ while running:
         bulletCloneX = playerX + playerWidth/2 - bulletWidth/2
         bulletCloneY = playerY - height
         bState = "fire"
-        if space_pressed:
-            bullet(bulletCloneX, bulletCloneY)
+    if space_pressed:
+        bullet(bulletCloneX, bulletCloneY)
     
     bulletY += bChangeY
     if bulletY <= -reload_value:
@@ -773,20 +781,15 @@ while running:
                         shieldsound.play()
                         shield = True
                         health = 5       
-                        print("Shield and health")   
                 if len(frameLog)>3 and frameLog[level_player+1] - frameLog[level_player-2] < 120:
                         shield = True
                         shieldsound.play()
-                        print("Shield")
             frameLog.remove(frameLog[0])
         frameLog.append(currentFrame)
             
         prevFrame = currentFrame
         previous_kill_score = kill
-        if len(frameLog)==(2+level_player):
-            print(frameLog[level_player+1])
-            print( frameLog[level_player-1])
-        print(frameLog)
+
 
     if shield and currentFrame - prevFrame < 200:
         shield_protection(playerX, playerY)
@@ -826,7 +829,7 @@ while running:
         godMode = 1
     else:
         godMode = 0
-    if l and u:
+    if l and u and level_player != 10:
         level_player += 1
         levelUpSound.play()
         noOfBullets = 1 + int(log(level_player+1)**2)
